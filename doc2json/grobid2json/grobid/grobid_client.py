@@ -117,12 +117,14 @@ class GrobidClient(ApiClient):
             time.sleep(self.sleep_time)
             return self.process_pdf_stream(pdf_file, pdf_strm, service)
         elif status != 200:
+            if not os.path.exists(output):
+                os.makedirs(output)
             with open(os.path.join(output, "failed.log"), "a+") as failed:
                 failed.write(pdf_file.strip(".pdf") + "\n")
             print('Processing failed with error ' + str(status))
-            return ""
+            return False, res.text
         else:
-            return res.text
+            return True, res.text
 
     def process_pdf(self, pdf_file: str, output: str, service: str) -> None:
         # check if TEI file is already produced
