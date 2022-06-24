@@ -29,8 +29,11 @@ def upload_file():
             # compute hash
             pdf_sha = hashlib.sha1(pdf_content).hexdigest()
             # get results
-            results = process_pdf_stream(filename, pdf_sha, pdf_content)
-            return jsonify(results)
+            success, results = process_pdf_stream(filename, pdf_sha, pdf_content)
+            if success:
+                return jsonify(results)
+            else:
+                return jsonify(results), 400
         # read latex file
         elif filename.endswith('gz'):
             zip_stream = uploaded_file.stream

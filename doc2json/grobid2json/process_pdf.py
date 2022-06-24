@@ -23,15 +23,21 @@ def process_pdf_stream(input_file: str, sha: str, input_stream: bytes, grobid_co
     """
     # process PDF through Grobid -> TEI.XML
     client = GrobidClient(grobid_config)
-    tei_text = client.process_pdf_stream(input_file, input_stream, 'temp', "processFulltextDocument")
+    success, tei_text = client.process_pdf_stream(input_file, input_stream, 'temp', "processFulltextDocument")
 
-    # make soup
-    soup = BeautifulSoup(tei_text, "xml")
+    if success :
+        # make soup
+        soup = BeautifulSoup(tei_text, "xml")
 
-    # get paper
-    paper = convert_tei_xml_soup_to_s2orc_json(soup, input_file, sha)
+        # get paper
+        paper = convert_tei_xml_soup_to_s2orc_json(soup, input_file, sha)
 
-    return paper.release_json('pdf')
+        return success, paper.release_json('pdf')
+    else:
+        return success, {
+            'statusCode': 400,
+            'errMessage': tei_text
+        }
 
 
 def process_pdf_file(
